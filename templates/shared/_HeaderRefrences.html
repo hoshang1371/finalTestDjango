@@ -1,0 +1,33 @@
+{% load static %}
+
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ setting.title }} </title>
+
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style_nav.css' %}">
+    <link rel="icon" href="{{ setting.logo_image.url }}" type="image/gif" sizes="16x16">
+    <script src="{% static 'js/jquery-3.2.1.min.js' %}"></script>
+
+    <script>
+        var operationsystemName = "Unknown OS";
+        if (navigator.userAgent.indexOf("Win") != -1) operationsystemName =
+            "Windows OS";
+        if (navigator.userAgent.indexOf("Mac") != -1) operationsystemName =
+            "Macintosh";
+        if (navigator.userAgent.indexOf("Linux") != -1) operationsystemName =
+            "Linux OS";
+        if (navigator.userAgent.indexOf("Android") != -1) operationsystemName =
+            "Android OS";
+        if (navigator.userAgent.indexOf("like Mac") != -1) operationsystemName =
+            "iOS";
+
+        console.log(operationsystemName)
+    </script>
+
+</head>
