@@ -39,11 +39,12 @@ DEBUG = True
 # python manage.py runserver 192.168.1.52:8000
 ALLOWED_HOSTS = [
     # '10.0.2.2',
-    '192.168.1.52',
+    #'192.168.1.52',
     # '192.168.1.15',
-    'localhost',
+    #'localhost',
     # '10.0.3.2',
-    '127.0.0.1',
+    '103.215.221.135',
+    #'127.0.0.1',
     "chrome-extension://eejfoncpjfgmeleakejdcanedmefagga",
 ]
 
@@ -138,13 +139,25 @@ WSGI_APPLICATION = 'spadelc.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#        # 'NAME': BASE_DIR / 'db.sqlite3',
+#    }
+#}
+#
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        # 'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+            'default': {
+                        'ENGINE': 'django.db.backends.postgresql',
+                        'NAME': 'djangodb',
+                        'USER': 'admin',
+                        'PASSWORD': 'Ho741jj555at963',
+                        'HOST': 'localhost',
+                        'PORT': '',
+                                                                    }
+                        }
 
 
 # Password validation
@@ -182,18 +195,20 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
-STATIC_ROOT = os.path.join(BASE_DIR, "static_cdn", "static_root")
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, "assets")
-# ]
 
+
+
+#STATIC_ROOT = os.path.join(BASE_DIR, "static_cdn", "static_root")
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "assets")
+]
+STATIC_ROOT = '/var/www/spadelc/static'
 
 
 MEDIA_URL = '/media/'
