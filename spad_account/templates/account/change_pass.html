@@ -1,0 +1,116 @@
+{% extends 'shared/_MainLayout.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/UnpaidOrder.css' %}">
+<!-- <link rel="stylesheet" href="{% static 'css/post_order.css' %}"> -->
+<link rel="stylesheet" href="{% static 'css/addresses.css' %}">
+<link rel="stylesheet" href="{% static 'css/change_pass.css' %}">
+	   
+
+<div class="user_content">
+    <div>
+        <div class="right_listOfFeatures">
+            <div class="right_headerList">
+
+                <img src="{% static 'images/avatar.jpg' %}" alt="Avatar">
+                <div>
+                    <p> {{user.first_name}} {{user.last_name}} </p>
+                    <h4>{{user.email}}</h4>
+                </div>
+            </div>
+            <div class="khat"></div>
+
+            <div class="right_panelGruop">
+                <div>
+                    <div>
+                        <i class="fas fa-edit"></i>
+                        <a href="user/edit">ویرایش اطلاعات</a>
+                    </div>
+                </div>
+
+                <div>
+                    <div>
+                        <i class="fa fa-key" aria-hidden="true"></i>
+                        <a href="{% url 'changePass' %}"> تغییر پسوورد </a>
+                    </div>
+                </div>
+
+                <div>
+                    <div>
+                        <i class="fa fa-ban" aria-hidden="true"></i>
+                        <a href="{% url 'user' %}"> سفارشات پرداخت نشده </a>
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <i class="fa fa-history" aria-hidden="true"></i>
+                        <a href="{% url 'historyOrder' %}"> تاریخچه سفارشات </a>
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <i class="fas fa-map-marker-alt"></i>
+                        <a href="{% url 'addresses' %}"> آدرس‌ها </a>
+                    </div>
+                </div>
+                <div>
+
+                    <a href="{% url 'log-out' %}"> خروج از حساب </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="Left_UnpaidOrders">
+        <p> تغییر پسوورد </p>
+        <div class="khat"></div>
+        <form method="post" novalidate>
+       {% csrf_token %}
+       <div class="form-group form_name {% if change_pass.password_now.errors %} errror {% endif %}">
+	       {{ change_pass.password_now }}
+	       <div class="show">نمایش</div>
+       </div>
+
+       <div class="form-group form_name {% if change_pass.password_new.errors %} errror {% endif %}">
+	       	{{ change_pass.password_new }}
+	    	<div class="show">نمایش</div>
+     	</div>
+
+     	<div class="form-group form_name {% if change_pass.password_accept.errors %} errror {% endif %}">
+		{{ change_pass.password_accept }}
+		<div class="show">نمایش</div>
+	</div>
+
+	<div class="" style="width: 100%;">
+		{% for error in change_pass.password_now.errors %}
+		<p style="color:red; ">{{error}}</p>
+		{% endfor %}
+	</div>
+
+	<div class="" style="width: 100%;">
+		{% for error in change_pass.password_new.errors %}
+		<p style="color:red; ">{{error}}</p>
+		{% endfor %}
+	</div>
+
+	<div class="" style="width: 100%;">
+		{% for error in change_pass.password_accept.errors %}
+		<p style="color:red; ">{{error}}</p>
+		{% endfor %}
+	</div>
+
+	<div class="send-group ">
+		<input type="submit" value="ارسـال">
+	</div>
+
+	</form>
+
+    </div>
+
+</div>
+
+
+<script src="{% static 'js/address.js' %}"></script>
+<script src="{% static 'js/password.js' %}"></script>
+	     
+{% endblock %}

@@ -7,6 +7,9 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     email = models.EmailField(unique=True,verbose_name="ایمیل")
+    codeVarifySms = models.CharField( max_length=5,blank = True, null = True,verbose_name='کد تایید پیامکی')
+    codeVarifySmsDate = models.DateTimeField(blank = True, null = True,verbose_name='زمان تایید پیامکی')
+
     # is_author = models.BooleanField(default=False,verbose_name="ok")
 
 

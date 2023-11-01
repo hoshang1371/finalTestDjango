@@ -22,8 +22,17 @@ from extentions import globalValue
 from ippanel import Client
 from ippanel import HTTPError, Error, ResponseCode
 
+from django.http import HttpResponse
+import datetime
+import logging
+
+from decouple import config
+
+logger = logging.getLogger(__name__)
+
 # you api key that generated from panel
-api_key = "tVnkn0VqCuVvolYqStkCNljo3AZef8gVmZgKq8FeRK0=	"
+api_key = config('API_KEY')
+pattern_code = config('PATTERN_CODE')
 
 # create client instance
 sms = Client(api_key)
@@ -45,7 +54,7 @@ def sendSms(code,mobilenumber):
         }
 
         message_id = sms.send_pattern(
-            "r1eppoe3ilfudqx",    # pattern code
+            pattern_code,    # pattern code
             "3000505",      # originator
             mobilenumber,  # recipient
             pattern_values,  # pattern values
@@ -54,7 +63,7 @@ def sendSms(code,mobilenumber):
         print(f"Error handled => code: {e.code}, message: {e.message}")
         if e.code == ResponseCode.ErrUnprocessableEntity.value:
             for field in e.message:
-                print(f"Field: {field} , Errors: {e.message[field]}")
+                    print(f"Field: {field} , Errors: {e.message[field]}")
     except HTTPError as e: # http error like network error, not found, ...
         print(f"Error handled => code: {e}")
 
@@ -64,18 +73,25 @@ def sendSmsForVarifyAddress(user,stop):
     # print(stop_threads_sendSmsVarify)
     # sendSms('12345','09367262334')
     # global code
-    print('sendSmsForVarifyAddressCode=',globalValue.code)
+    #print('sendSmsForVarifyAddressCode=',globalValue.code)
+    logger.warning('sendSmsForVarifyAddressCode= '+str(globalValue.code)+' '+str(datetime.datetime.now()))
     # todo : مقدار 120 صحیح است
     for a in range(0,120):
     # for a in range(0,10):
         time.sleep(1)
         # print(stop()) 
         if stop():
+            #globalValue.code = ''
+            logger.warning('sendSmsForVarifyAddressCodeEnd '+str(globalValue.code)+' '+str(datetime.datetime.now()))
+            logger.warning('======================================================')
             break
         print(a)
+        logger.warning('a= '+str(a)+'  '+str(datetime.datetime.now()))
 
-    globalValue.code = ''
-    print('sendSmsForVarifyAddressCodeEnd=',globalValue.code)
+    #globalValue.code = ''
+    #print('sendSmsForVarifyAddressCodeEnd=',globalValue.code)
+    #logger.warning('sendSmsForVarifyAddressCodeEnd '+str(globalValue.code)+' '+str(datetime.datetime.now()))
+
 
     # global code
     # print('sendSmsForVarifyAddress',code)

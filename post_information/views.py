@@ -31,9 +31,14 @@ from spad_account.token import account_activation_token
 
 # from rest_framework.response import Response as resResponse
 from django.contrib import messages
+import datetime 
 
+from django.http import HttpResponse
+import datetime
+import logging
+#logger = logging.getLogger(__name__)
 # t1 = threading.Thread(target=sendSmsForVarifyAddress, args=(10,))
-stop_threads_sendSmsVarify =False
+#stop_threads_sendSmsVarify =False
 # code=''
 # print('codeGlobal=',globalValue.code)
 @login_required(login_url='/login')
@@ -76,22 +81,23 @@ def post_order(request):
 
 @login_required(login_url='/login')
 def post_add_address(request):
-
+    user = User.objects.get(id=request.user.id)
     add_address = AddAddress(request.POST or None)
-    global stop_threads_sendSmsVarify
-    stop_threads_sendSmsVarify = True
+    #global stop_threads_sendSmsVarify
+    #stop_threads_sendSmsVarify = True
 
-    if add_address.is_valid():
-        first_name_for_post = add_address.cleaned_data.get('first_name_for_post')
-        last_name_for_post = add_address.cleaned_data.get('last_name_for_post')
-        Country_for_post = add_address.cleaned_data.get('Country_for_post')
-        City_for_post = add_address.cleaned_data.get('City_for_post')
-        Address_for_post = add_address.cleaned_data.get('Address_for_post')
-        phone_number_for_post = add_address.cleaned_data.get('phone_number_for_post')
-        global mobile_phone_number_for_post
-        mobile_phone_number_for_post = add_address.cleaned_data.get('mobile_phone_number_for_post')
-        check_mobile_phone_number_for_post = add_address.cleaned_data.get('check_mobile_phone_number_for_post')
-        post_code_for_post = add_address.cleaned_data.get('post_code_for_post')
+    if request.method == 'POST':
+        if add_address.is_valid():
+            first_name_for_post = add_address.cleaned_data.get('first_name_for_post')
+            last_name_for_post = add_address.cleaned_data.get('last_name_for_post')
+            Country_for_post = add_address.cleaned_data.get('Country_for_post')
+            City_for_post = add_address.cleaned_data.get('City_for_post')
+            Address_for_post = add_address.cleaned_data.get('Address_for_post')
+            phone_number_for_post = add_address.cleaned_data.get('phone_number_for_post')
+            global mobile_phone_number_for_post
+            mobile_phone_number_for_post = add_address.cleaned_data.get('mobile_phone_number_for_post')
+            check_mobile_phone_number_for_post = add_address.cleaned_data.get('check_mobile_phone_number_for_post')
+            post_code_for_post = add_address.cleaned_data.get('post_code_for_post')
         # print(first_name_for_post)
         # print(last_name_for_post)
         # print('Country_for_post',Country_for_post)
@@ -100,30 +106,33 @@ def post_add_address(request):
         # print(Address_for_post)
         # print(phone_number_for_post)
         # print(mobile_phone_number_for_post)
-        print('check_mobile_phone_number_for_post',check_mobile_phone_number_for_post)
-        # global code
-        print('is it',globalValue.code)
+            print('check_mobile_phone_number_for_post',check_mobile_phone_number_for_post)
+            #logger.warning('check_mobile_phone_for_post='+str(check_mobile_phone_number_for_post)+' '+str(datetime.datetime.now()))
+            # global code
+            print('is it',globalValue.code)
+            #logger.warning('is it'+str(globalValue.code)+' '+str(datetime.datetime.now()))
         
         # sendSms(globalValue.code,mobile_phone_number_for_post)
         #! check mobile number
-        if globalValue.code == check_mobile_phone_number_for_post:
-            PostAddress.objects.create(
-                    owner_id= request.user.id,
-                    firstName = first_name_for_post,
-                    lastName = last_name_for_post,
-                    country = Country[0][1],
-                    city = City_for_post,
-                    address = Address_for_post,
-                    phone_number = phone_number_for_post,
-                    mobile_phone_number = mobile_phone_number_for_post,
-                    post_code = post_code_for_post,
-                    isCorrect_mobile_phone_number = True
-                    )
-            # print("redirect")
-            return redirect('/post_info/سفارش')
+            deffTime =int(datetime.datetime.now(datetime.timezone.utc).timestamp()-user.codeVarifySmsDate.timestamp())
+            if(deffTime < 120):
+                if user.codeVarifySms == check_mobile_phone_number_for_post:
+                    PostAddress.objects.create(
+                            owner_id= request.user.id,
+                            firstName = first_name_for_post,
+                            lastName = last_name_for_post,
+                            country = Country[0][1],
+                            city = City_for_post,
+                            address = Address_for_post,
+                            phone_number = phone_number_for_post,
+                            mobile_phone_number = mobile_phone_number_for_post,
+                            post_code = post_code_for_post,
+                            isCorrect_mobile_phone_number = True
+                        )
+                    return redirect('/post_info/سفارش')
         
-        messages.success(request, 'کد ارسالی صحیح نمیباشد')
-        return redirect('/post_info/post_add_address')      
+            messages.success(request, 'کد ارسالی صحیح نمیباشد')
+            return redirect('/post_info/post_add_address')      
 
 
         
@@ -162,9 +171,7 @@ class send_code_for_varify_mobile_address(APIView):
     authentication_classes = (SessionAuthentication, )
 
     def post(self, request, *args, **kwargs):
-        # print('post')
-        # print(self.request.user)
-        # print(request.data)
+        user = User.objects.get(id=request.user.id)
         mobNumber =request.data.get('mobNum')
         # print(request.data.get('mobNum'))
         if mobNumber=='':
@@ -172,55 +179,59 @@ class send_code_for_varify_mobile_address(APIView):
             # messages.success(request, 'لطفاً شماره موبایل را وارد کنید.')
             # print("not ok")
             return JsonResponse({"mobNum": "not ok"})
+        #globalValue.code = ''
 
-        globalValue.code = random_with_N_digits(5)
+        #globalValue.code = random_with_N_digits(5)
+        user.codeVarifySms = random_with_N_digits(5)
+        user.codeVarifySmsDate = datetime.datetime.now(datetime.timezone.utc)
+        user.save()
 
-        sendSms(globalValue.code,mobNumber)
+        sendSms(user.codeVarifySms,mobNumber)
         
-        print('send_code_for_varify_mobile_addressCode=',globalValue.code)
-        global stop_threads_sendSmsVarify
-        stop_threads_sendSmsVarify = False
-        sendSmsVarify = threading.Thread(
-                target=sendSmsForVarifyAddress, 
-                args=(
-                    self.request.user,
-                    lambda : stop_threads_sendSmsVarify,
-                    )
-                )
-        sendSmsVarify.start()
+        #print('send_code_for_varify_mobile_addressCode=',globalValue.code)
+        #global stop_threads_sendSmsVarify
+        #stop_threads_sendSmsVarify = False
+        #sendSmsVarify = threading.Thread(
+         #       target=sendSmsForVarifyAddress, 
+          #      args=(
+           #         self.request.user,
+            #        lambda : stop_threads_sendSmsVarify,
+             #       )
+              #  )
+        #sendSmsVarify.start()
 
         return JsonResponse({'mobNum':'ok'})
 
     def get(self, request, *args, **kwargs):
         # print('nanat o sag gaiid')
-        print(self.request.user)
-        print(request.body)
+        #print(self.request.user)
+        #print(request.body)
         # global code
         # code = random_with_N_digits(5)
         # print('send_code_for_varify_mobile_addressCode=',code)
-        globalValue.code = random_with_N_digits(5)
-        print('send_code_for_varify_mobile_addressCode=',globalValue.code)
+        #globalValue.code = ''
+        #globalValue.code = random_with_N_digits(5)
+        #print('send_code_for_varify_mobile_addressCode=',globalValue.code)
 
-        global stop_threads_sendSmsVarify
+        #global stop_threads_sendSmsVarify
         # stop_threads_sendSmsVarify = True
-        stop_threads_sendSmsVarify = False
+        #stop_threads_sendSmsVarify = False
         # print(stop_threads_sendSmsVarify)
-        sendSmsVarify = threading.Thread(
-                target=sendSmsForVarifyAddress, 
-                args=(
-                    self.request.user,
-                    lambda : stop_threads_sendSmsVarify,
-                    )
-                )
-        sendSmsVarify.start()
+        #sendSmsVarify = threading.Thread(
+         #       target=sendSmsForVarifyAddress, 
+          #      args=(
+           #         self.request.user,
+            #        lambda : stop_threads_sendSmsVarify,
+             #       )
+              #  )
+        #sendSmsVarify.start()
         # stop_threads_sendSmsVarify = True
 
         return JsonResponse({'foo':'bar'})
     
 @login_required(login_url='/login')
 def edit_post_add_address(request, pk):
-    print('pk')
-    print(pk)
+    user = User.objects.get(id=request.user.id)
 
     # PostAddress
     postData_info = PostAddress.objects.filter(id=pk)
@@ -246,40 +257,44 @@ def edit_post_add_address(request, pk):
                                  'mobile_phone_number_for_post' : mobile_phone_number_for_edit,
                                  'post_code_for_post' : post_code_for_edit,
                                  })
+    if request.method == 'POST':
+        if add_address.is_valid():
+            first_name_for_post = add_address.cleaned_data.get('first_name_for_post')
+            last_name_for_post = add_address.cleaned_data.get('last_name_for_post')
+            Country_for_post = add_address.cleaned_data.get('Country_for_post')
+            City_for_post = add_address.cleaned_data.get('City_for_post')
+            Address_for_post = add_address.cleaned_data.get('Address_for_post')
+            phone_number_for_post = add_address.cleaned_data.get('phone_number_for_post')
+            mobile_phone_number_for_post = add_address.cleaned_data.get('mobile_phone_number_for_post')
+            post_code_for_post = add_address.cleaned_data.get('post_code_for_post')
+            # print(first_name_for_post)
+            # print(last_name_for_post)
+            # print('Country_for_post',Country_for_post)
+            # print('Country',Country[0][1])
+            # print(City_for_post)
+            # print(Address_for_post)
+            # print(phone_number_for_post)
+            # print(mobile_phone_number_for_post)
+            # print(post_code_for_post)
+            deffTime =int(datetime.datetime.now(datetime.timezone.utc).timestamp()-user.codeVarifySmsDate.timestamp())
+            if(deffTime < 120):
+            
+                postData_info.update(
+                        owner_id= request.user.id,
+                        firstName = first_name_for_post,
+                        lastName = last_name_for_post,
+                        country = Country[0][1],
+                        city = City_for_post,
+                        address = Address_for_post,
+                        phone_number = phone_number_for_post,
+                        mobile_phone_number = mobile_phone_number_for_post,
+                        post_code = post_code_for_post,
+                        )
+                print("redirect")
+                return redirect('/post_info/سفارش')
 
-    if add_address.is_valid():
-        first_name_for_post = add_address.cleaned_data.get('first_name_for_post')
-        last_name_for_post = add_address.cleaned_data.get('last_name_for_post')
-        Country_for_post = add_address.cleaned_data.get('Country_for_post')
-        City_for_post = add_address.cleaned_data.get('City_for_post')
-        Address_for_post = add_address.cleaned_data.get('Address_for_post')
-        phone_number_for_post = add_address.cleaned_data.get('phone_number_for_post')
-        mobile_phone_number_for_post = add_address.cleaned_data.get('mobile_phone_number_for_post')
-        post_code_for_post = add_address.cleaned_data.get('post_code_for_post')
-        # print(first_name_for_post)
-        # print(last_name_for_post)
-        # print('Country_for_post',Country_for_post)
-        # print('Country',Country[0][1])
-        # print(City_for_post)
-        # print(Address_for_post)
-        # print(phone_number_for_post)
-        # print(mobile_phone_number_for_post)
-        # print(post_code_for_post)
-
-        
-        postData_info.update(
-                owner_id= request.user.id,
-                firstName = first_name_for_post,
-                lastName = last_name_for_post,
-                country = Country[0][1],
-                city = City_for_post,
-                address = Address_for_post,
-                phone_number = phone_number_for_post,
-                mobile_phone_number = mobile_phone_number_for_post,
-                post_code = post_code_for_post,
-                )
-        print("redirect")
-        return redirect('/post_info/سفارش')      
+            messages.success(request, 'کد ارسالی صحیح نمیباشد')
+            return redirect('/post_info/post_add_address')
 
 
         

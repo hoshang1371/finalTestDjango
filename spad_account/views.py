@@ -22,7 +22,7 @@ from spad_eshop_order.models import Order, OrderDetail
 from .token import account_activation_token
 from django.core.mail import EmailMessage
 #from django.contrib.auth.forms import PasswordChangeForm
-from .forms import LoginForm, RegisterForm, EditUserForm
+from .forms import LoginForm, RegisterForm, EditUserForm, ChangePass
 # from django.contrib.auth.models import User
 from spad_account.models import User
 
@@ -217,75 +217,43 @@ def edit_user_profile(request):
         raise Http404('کاربر مورد نظر یافت نشد')
 
     edit_user_form = EditUserForm(request.POST or None)
-
-    if edit_user_form.is_valid():
-        first_name = edit_user_form.cleaned_data.get('first_name')
-        last_name = edit_user_form.cleaned_data.get('last_name')
-        email = edit_user_form.cleaned_data.get('email')
-        choice_field = edit_user_form.cleaned_data.get('choice_field')
-        SAL = edit_user_form.cleaned_data.get('SAL')
-        MAH = edit_user_form.cleaned_data.get('MAH')
-        ROZ = edit_user_form.cleaned_data.get('ROZ')
-        password_now = edit_user_form.cleaned_data.get('password_now')
-        password_new = edit_user_form.cleaned_data.get('password_new')
-        password_accept = edit_user_form.cleaned_data.get('password_accept')
-        # print(edit_user_form.cleaned_data)
-        # print(first_name)
-        # print(last_name)
-        # print(email)
-        # print(f'choice_field= { choice_field }')
-        # print(SAL)
-        # print(MAH)
-        # print(ROZ)
-        # print(password_now)
-        # print(password_new)
-        # print(password_accept)
-
-        # if user.password == password_now:
-        #     print("ok")
-        #UserData.objects.create(user=user1,choiceField="2")
-        check = user.check_password(password_now)
-        # print(check)
-        if check == True:
-            if password_new == password_accept:
-                #print('password is changed')
-                user.set_password(password_new)
-            # else:
-            #     raise ValidationError(("پسووردها برابر نیستند"))
+    if request.method == 'POST':
+        if edit_user_form.is_valid():
+            first_name = edit_user_form.cleaned_data.get('first_name')
+            last_name = edit_user_form.cleaned_data.get('last_name')
+            email = edit_user_form.cleaned_data.get('email')
+            choice_field = edit_user_form.cleaned_data.get('choice_field')
+            SAL = edit_user_form.cleaned_data.get('SAL')
+            MAH = edit_user_form.cleaned_data.get('MAH')
+            ROZ = edit_user_form.cleaned_data.get('ROZ')
             
-        # print(user.password)
 
-        user.first_name = first_name
-        user.last_name = last_name
-        # if user.userdata.choiceField is None:
-        #     UserData.objects.create(user=user,choiceField=choice_field)
-        # else:
-        #     user.userdata.choiceField = choice_field
-        try:
-            user.userdata.choiceField = choice_field
-        except ObjectDoesNotExist:
-            UserData.objects.create(user=user,choiceField=choice_field)
-        
-        try:
-            user.userdata.SAL = SAL
-        except ObjectDoesNotExist:
-            UserData.objects.create(user=user, SAL=SAL)
+            user.first_name = first_name
+            user.last_name = last_name
+            try:
+                user.userdata.choiceField = choice_field
+            except ObjectDoesNotExist:
+                UserData.objects.create(user=user,choiceField=choice_field)
+            
+            try:
+                user.userdata.SAL = SAL
+            except ObjectDoesNotExist:
+                UserData.objects.create(user=user, SAL=SAL)
 
-        try:
-            user.userdata.MAH = MAH
-        except ObjectDoesNotExist:
-            UserData.objects.create(user=user, MAH=MAH)
+            try:
+                user.userdata.MAH = MAH
+            except ObjectDoesNotExist:
+                UserData.objects.create(user=user, MAH=MAH)
 
-        try:
-            user.userdata.ROZ = ROZ
-        except ObjectDoesNotExist:
-            UserData.objects.create(user=user, ROZ=ROZ)
+            try:
+                user.userdata.ROZ = ROZ
+            except ObjectDoesNotExist:
+                UserData.objects.create(user=user, ROZ=ROZ)
 
-        user.save()
-        user.userdata.save()
+            user.save()
+            user.userdata.save()
+            return redirect('/')
 
-#related_object = Related(field3=value3)
-#r = Restaurant(place=p1, serves_hot_dogs=True, serves_pizza=False)
     username = request.user.username
     site_setting = SiteSetting.objects.first()
     
@@ -297,13 +265,39 @@ def edit_user_profile(request):
     
     return render(request,'account/edit_account.html', contex)
 
+@login_required(login_url='/login')
+def change_pass(request):
+        user_id = request.user.id
+        user = User.objects.get(id=user_id)
 
-# class ChildPasswordResetView(PasswordContextMixin, FormView):
-#     template_name = "registration/password_reset_form.html"
+        if user is None:
+            raise Http404('کاربر مورد نظر یافت نشد')
 
-# def my_view(request):
-# 	jalali_join = datetime2jalali(request.user.date_joined).strftime('%y/%m/%d _ %H:%M:%S')
-# from django.utils.encoding import force_bytes, force_text
+        change_pass = ChangePass(request.POST or None)
+
+
+        if request.method == 'POST':
+            if change_pass.is_valid():
+                password_now = change_pass.cleaned_data.get('password_now')
+                password_new = change_pass.cleaned_data.get('password_new')
+                password_accept = change_pass.cleaned_data.get('password_accept')
+                check = user.check_password(password_now)
+                if check == True:
+                    if password_new == password_accept:
+                        user.set_password(password_new)
+                        user.save()
+                        return redirect('/')
+        username = request.user.username
+        site_setting = SiteSetting.objects.first()
+                                    
+        contex = {
+            'username' : username,
+            'setting': site_setting,
+            'change_pass' : change_pass,
+            }
+                                        
+        return render(request,'account/change_pass.html', contex)
+
 
 def activate(request, uidb64, token):
     try:
