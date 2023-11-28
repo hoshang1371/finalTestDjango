@@ -281,4 +281,8 @@ td div{
     .user_content .Left_UnpaidOrders{
         width: calc(100% - 40px)!important;
     }
+    td, th {
+        padding: 4px;
+    }
+
 }

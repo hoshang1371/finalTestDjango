@@ -119,6 +119,8 @@
 .post_info>div:nth-child(4)>p{
     font-family: 'samim';
     font-size: 16px;
+    width: auto;
+    overflow: hidden;
 }
 .post_info>div:nth-child(4)>span{
     margin: 0px 5px;
@@ -308,10 +310,24 @@
         flex-direction: column;
     }
 
+    .post_info>div:nth-child(4)>p{
+	width: 100%;
+	text-align: center;
+    }
+
+    .post_info>div:nth-child(4)>svg{
+	margin-left: 0px;
+    }
     .post_info>div:nth-child(4)>span {
         display: none;
     }
+    .post_info>div:nth-child(5){
+	flex-direction: column-reverse;
+     }
 
+    .post_info>div:nth-child(5)>span {
+       display: none;
+    }
     /* .post_info>div:nth-child(3) {
         flex-wrap: wrap;
     } */

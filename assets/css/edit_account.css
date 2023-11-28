@@ -138,3 +138,9 @@
 .birth_day_content select option{
     color: rgba(97, 93, 93, 0.822);
 }
+
+@media all and (max-width: 960px) {
+    .form-group{
+	    width: 90%;
+	}
+}

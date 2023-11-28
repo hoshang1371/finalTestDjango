@@ -25,7 +25,19 @@ function getElementOfId(inItem) {
 // let post_info_Item = document.querySelectorAll(".post_info>div:first-child>div:last-child>p:last-child");
 let post_info_Item = document.querySelectorAll(".post_info");
 
+let edameh = document.querySelector(".continue");
 // console.log(post_info_Item);
+
+if( post_info_Item.length == 0){
+    edameh.addEventListener('click',() => {
+	    alert("لطفاً یک آدرس اضافه کنید")
+	    edameh.disabled = true
+	});
+}
+else{
+    edameh.disabled = false
+}
+
 
 post_info_Item.forEach(inItem => {
     let remove_item = inItem.querySelector('div:nth-child(2)>div:last-child>p:last-child');
@@ -34,9 +46,9 @@ post_info_Item.forEach(inItem => {
     // console.log('pass_f',pass_f)
     edit_item.addEventListener('click',function (){
         var id=getElementOfId(inItem)
-        console.log(id);
-        console.log(path);
-        console.log(window.location.href);
+//        console.log(id);
+//        console.log(path);
+//        console.log(window.location.href);
         if(window.location.href.includes('post_info')){
             window.location.href =('edit_post_add_address/'+id);
         }
